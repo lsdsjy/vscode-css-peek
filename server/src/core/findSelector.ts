@@ -55,7 +55,8 @@ export default function findSelector(
   const htmlScanner: Scanner = getHTMLLanguageService().createScanner(text);
   let attribute: string = null;
 
-  console.log(`${selectorWord} ${start}`);
+  // FOR DEBUGGING
+  // console.log(`${selectorWord} ${start}`);
   let tokenType = htmlScanner.scan();
   while (tokenType !== TokenType.EOS) {
     switch (tokenType) {
@@ -68,9 +69,9 @@ export default function findSelector(
         }
 
         // FOR DEBUGGING
-        console.log(
-          `  ${htmlScanner.getTokenText()} ${htmlScanner.getTokenOffset()} ${htmlScanner.getTokenEnd()}`
-        );
+        // console.log(
+        //   `  ${htmlScanner.getTokenText()} ${htmlScanner.getTokenOffset()} ${htmlScanner.getTokenEnd()}`
+        // );
         const tokenOffset = htmlScanner.getTokenOffset();
 
         if (
