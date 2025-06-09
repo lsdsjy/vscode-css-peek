@@ -1,7 +1,7 @@
 # Contributor Guide
 
 ## Testing Instructions
-- Run `yarn test` from the repo root to run the tests using the vscode-test cli
+- Run `xvfb-run -a yarn test` to run the tests using the vscode-test cli
 - Ensure to always build the latest code using `yarn build` or `yarn watch` before running any tests
 - The `tests/fixtures` directory contains various example markup and style files to test the extension under different conditions
 - Use `yarn test --help` to discover various options that can be used to filter the tests being executed
