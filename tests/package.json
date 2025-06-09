@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@types/vscode": "^1.33.0",
-    "vscode-languageserver": "^5.2.1",
-    "vscode-test": "^1.4.0"
-  },
-  "scripts": {}
+    "vscode-languageserver": "^5.2.1"
+  }
 }

@@ -1,19 +1,16 @@
 import * as assert from "assert";
-import { before } from "mocha";
 import * as vscode from "vscode";
 import { TextDocument as ServerTextDocument } from "vscode-languageserver";
 
-import findSelector from "../../../server/out/core/findSelector";
-import { create } from "../../../server/out/logger";
+import findSelector from "../../server/out/core/findSelector";
+import { create } from "../../server/out/logger";
 
 suite("Extension Tests", () => {
   let document: vscode.TextDocument;
   let document2: ServerTextDocument;
 
-  before((done) => {
-    console.log("before");
-    // @ts-ignore
-    create(console);
+  suiteSetup((done) => {
+    create(console as any);
     vscode.workspace
       .openTextDocument(
         vscode.Uri.joinPath(

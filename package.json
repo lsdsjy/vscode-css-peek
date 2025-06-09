@@ -131,24 +131,23 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
-    "compile": "tsc -b",
+    "vscode:prepublish": "yarn build",
+    "build": "tsc -b",
     "prettier": "prettier './{server,client,tests}/**/*' -c",
     "lint": "yarn run eslint . --ext ts",
     "watch": "tsc -b -w",
-    "test": "nyc node tests/out/runTest.js",
-    "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
+    "test": "vscode-test",
     "postinstall": "cd client && yarn && cd ../server && yarn && cd ../tests && yarn && cd .."
   },
   "devDependencies": {
-    "@types/mocha": "^8.0.0",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^14.0.24",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
-    "codecov": "^3.7.2",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^7.5.0",
-    "mocha": "^8.3.2",
-    "nyc": "^15.1.0",
+    "mocha": "^10.0.10",
     "prettier": "^2.0.5",
     "typescript": "^5.1.6"
   },
