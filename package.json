@@ -131,7 +131,8 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn build",
+    "vscode:prepublish": "yarn run clean && yarn build",
+    "clean": "rm -rf ./client/out ./server/out ./tests/out",
     "build": "tsc -b",
     "prettier": "prettier './{server,client,tests}/**/*' -c",
     "lint": "yarn run eslint . --ext ts",

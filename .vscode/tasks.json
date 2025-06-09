@@ -4,21 +4,25 @@
     {
       "type": "npm",
       "script": "build",
-      "group": "build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
         "panel": "dedicated",
         "reveal": "silent",
         "clear": true
       },
-      "problemMatcher": ["$tsc"]
+      "problemMatcher": ["$tsc"],
+      "label": "npm: build",
+      "detail": "tsc -b"
     },
     {
       "type": "npm",
       "script": "watch",
       "isBackground": true,
       "group": {
-        "kind": "build",
-        "isDefault": true
+        "kind": "build"
       },
       "presentation": {
         "panel": "dedicated",
