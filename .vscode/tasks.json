@@ -9,8 +9,6 @@
         "isDefault": true
       },
       "presentation": {
-        "panel": "dedicated",
-        "reveal": "silent",
         "clear": true
       },
       "problemMatcher": ["$tsc"],
@@ -26,7 +24,6 @@
       },
       "presentation": {
         "panel": "dedicated",
-        "reveal": "silent",
         "clear": true
       },
       "problemMatcher": ["$tsc-watch"]
