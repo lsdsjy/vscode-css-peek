@@ -1,5 +1,8 @@
 # Contributor Guide
 
+## Dev environment tips
+- Ignore warnings from `yarn` about the "vscode" engine appearing to be invalid
+
 ## Testing Instructions
 - Run `xvfb-run -a yarn test` to run the tests using the vscode-test cli
 - Ensure to always build the latest code using `yarn build` or `yarn watch` before running any tests
@@ -10,4 +13,4 @@
 - Add or update tests for the code you change, even if nobody asked.
 
 ## PR instructions
-Title format: [<project_name>] <Title>
+Title format: [OpenAI Codex] <Title>
