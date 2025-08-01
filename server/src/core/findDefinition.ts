@@ -36,16 +36,6 @@ export function getLanguageService(document: TextDocument) {
   return service;
 }
 
-function getSelection(selector: Selector): string {
-  switch (selector.attribute) {
-    case "id":
-      return "#" + selector.value;
-    case "class":
-      return "." + selector.value;
-    default:
-      return selector.value;
-  }
-}
 
 function resolveSymbolName(symbols: SymbolInformation[], i: number): string {
   const name = symbols[i].name;
@@ -55,34 +45,75 @@ function resolveSymbolName(symbols: SymbolInformation[], i: number): string {
   return name;
 }
 
+function splitCamelCase(str: string): string[] {
+  return str.replace(/([a-z])([A-Z])/g, '$1 $2').split(/\s+/);
+}
+
+function isFuzzyMatch(query: string, target: string): boolean {
+  if (!query || !target) return false;
+  
+  query = query.toLowerCase();
+  target = target.toLowerCase();
+  
+  // 直接前缀匹配
+  if (target.startsWith(query)) {
+    return true;
+  }
+  
+  // 模糊匹配：检查query的每个字符是否按顺序出现在target中
+  let queryIndex = 0;
+  let targetIndex = 0;
+  
+  while (queryIndex < query.length && targetIndex < target.length) {
+    if (query[queryIndex] === target[targetIndex]) {
+      queryIndex++;
+    }
+    targetIndex++;
+  }
+  
+  // 如果所有query字符都匹配了，就是模糊匹配
+  if (queryIndex === query.length) {
+    return true;
+  }
+  
+  // camelCase增强匹配：检查首字母缩写匹配
+  const targetParts = splitCamelCase(target);
+  const queryChars = query.split('');
+  
+  // 检查是否是首字母缩写，如 "slh" 匹配 "SessionListHeader"
+  if (queryChars.length <= targetParts.length) {
+    let matchCount = 0;
+    for (let i = 0; i < targetParts.length && matchCount < queryChars.length; i++) {
+      if (targetParts[i].length > 0 && targetParts[i][0].toLowerCase() === queryChars[matchCount]) {
+        matchCount++;
+      }
+    }
+    if (matchCount === queryChars.length) {
+      return true;
+    }
+  }
+  
+  // 检查分段前缀匹配：如 "sesslh" 匹配 "sessionListHeader"
+  const targetChars = target.split('');
+  let charMatchCount = 0;
+  
+  for (let i = 0; i < targetChars.length && charMatchCount < query.length; i++) {
+    if (targetChars[i] === query[charMatchCount]) {
+      charMatchCount++;
+    }
+  }
+  
+  return charMatchCount === query.length;
+}
+
 export function findSymbols(
   selector: Selector,
   stylesheetMap: StylesheetMap
 ): SymbolInformation[] {
   const foundSymbols: SymbolInformation[] = [];
 
-  // Construct RegExp of selector to test against the symbols
-  let selection = getSelection(selector);
   const classOrIdSelector =
     selector.attribute === "class" || selector.attribute === "id";
-  if (selection[0] === ".") {
-    selection = "\\" + selection;
-  }
-  if (!classOrIdSelector) {
-    // Tag selectors must have nothing, whitespace, or a combinator before it.
-    selection = "(^|[\\s>+~])" + selection;
-  }
-
-  selection += "(\\[[^\\]]*\\]|:{1,2}[\\w-()]+|\\.[\\w-]+|#[\\w-]+)*\\s*";
-
-  // This regular expression will be used to test the symbol
-  const symbolRegexp = new RegExp(
-    selection + "$",
-    classOrIdSelector ? "" : "i"
-  );
-  // This regular expression will be used to test if file should even be parsed
-  // in the first place
-  const fileRegexp = new RegExp(selection, classOrIdSelector ? "" : "i");
 
   // Test all the symbols against the RegExp
   Object.keys(stylesheetMap).forEach((uri) => {
@@ -94,10 +125,7 @@ export function findSymbols(
         symbols = styleSheet.symbols;
       } else {
         // The document symbols haven't been extracted and cached yet.
-        // Let's first do a dumb check to see if the document even has the text we need in the first place
-        // if it doesn't, then we don't need to bother extrating and caching any symbols at all
-        const text = styleSheet.document.getText();
-        if (text.search(fileRegexp) === -1) return;
+        // Skip the file-based filtering for now since we're doing fuzzy matching
         console.log(`Parsing ${path.basename(uri)}`);
 
         // Looks like it does. Now, let's go ahead and actually get the symbols + cache the symbols for the future
@@ -110,20 +138,23 @@ export function findSymbols(
       }
 
       console.log(`${path.basename(uri)} has ${symbols.length} symbols`);
-      console.log(`Searching through them all for /${selection}/`);
+      console.log(`Searching through them all for "${selector.value}"`);
 
       symbols.forEach((symbol, i) => {
         const name = resolveSymbolName(symbols, i);
 
-        // console.log(
-        //   `  ${symbol.location.range.start.line}:${
-        //     symbol.location.range.start.character
-        //   } ${symbol.deprecated ? "[deprecated] " : " "}${
-        //     symbol.containerName ? `[container:${symbol.containerName}] ` : " "
-        //   } [${symbol.kind}] ${name}`
-        // );
+        // 提取类名或ID名（去掉前缀的.或#）
+        let targetName = name;
+        if (classOrIdSelector) {
+          if (selector.attribute === "class" && name.startsWith(".")) {
+            targetName = name.substring(1);
+          } else if (selector.attribute === "id" && name.startsWith("#")) {
+            targetName = name.substring(1);
+          }
+        }
 
-        if (name.search(symbolRegexp) !== -1) {
+        // 使用新的模糊匹配逻辑
+        if (isFuzzyMatch(selector.value, targetName)) {
           foundSymbols.push(symbol);
         } else if (!classOrIdSelector) {
           // Special case for tag selectors - match "*" as the rightmost character
